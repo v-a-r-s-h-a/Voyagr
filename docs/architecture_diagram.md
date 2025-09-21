@@ -1,12 +1,4 @@
-# Trip Planner System Architecture
-
-## Overview
-
-- Frontend: React Native/Flutter
-- Backend: FastAPI (Python)
-- AI Layer: OpenAI GPT, LangChain
-- MCP Layer: API connectors
-- Database: PostgreSQL/MongoDB
+# Trip Planner Architecture Diagram
 
 ## Architecture Diagrams (Markdown Preview Mermaid Support)
 
