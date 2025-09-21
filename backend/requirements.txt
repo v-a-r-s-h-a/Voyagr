@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+openai
+langchain
+google-cloud-aiplatform
+google-auth
+requests
