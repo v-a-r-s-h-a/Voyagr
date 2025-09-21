@@ -29,7 +29,7 @@ class TripRequest(BaseModel):
 def root():
     return {"message": "Trip Planner Backend Running"}
 
-from .ai_service import generate_itinerary
+from ai_service import generate_itinerary
 
 @app.post("/generate-itinerary")
 async def generate_itinerary_endpoint(request: TripRequest):

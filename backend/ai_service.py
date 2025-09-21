@@ -34,3 +34,13 @@ def generate_itinerary(user_profile, trip_params):
     # Optionally enrich with Vertex AI recommendations
     activities = recommend_activities_vertex(trip_params.get("destination", ""), user_profile.get("preferences", ""))
     return {"itinerary": itinerary, "recommended_activities": activities}
+
+# def generate_itinerary(user_profile, trip_params):
+#     # Mock response for development
+#     return {
+#         "itinerary": [
+#             {"day": 1, "activity": "Arrive, check-in hotel, city walk", "cost": 100},
+#             {"day": 2, "activity": "Museum visit, local food tour", "cost": 80},
+#             {"day": 3, "activity": "Adventure activity, dinner", "cost": 120}
+#         ]
+#     }
