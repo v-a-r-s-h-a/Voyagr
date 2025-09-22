@@ -1,36 +1,51 @@
 
+
 import React, { useState } from 'react';
 
 const bgImage = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80';
+const currencyOptions = ['USD', 'EUR', 'INR', 'GBP', 'JPY'];
+const groupTypeOptions = ['solo', 'couple', 'family', 'friends'];
+const preferenceOptions = ['culture', 'food', 'adventure', 'relaxation', 'nightlife', 'family-friendly'];
+
 
 export default function App() {
     const [budget, setBudget] = useState('');
     const [currency, setCurrency] = useState('USD');
     const [duration, setDuration] = useState('');
     const [startDate, setStartDate] = useState('');
-    const [preferences, setPreferences] = useState('');
+    const [preferences, setPreferences] = useState([]);
     const [groupType, setGroupType] = useState('solo');
     const [groupSize, setGroupSize] = useState('1');
     const [constraints, setConstraints] = useState('');
     const [result, setResult] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleSubmit = async () => {
-        const response = await fetch('http://localhost:8000/generate-itinerary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                budget,
-                currency,
-                duration,
-                startDate,
-                preferences,
-                groupType,
-                groupSize,
-                constraints
-            })
-        });
-        const data = await response.json();
-        setResult(data);
+        setLoading(true);
+        setError('');
+        try {
+            const response = await fetch('http://localhost:8000/generate-itinerary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    budget,
+                    currency,
+                    duration,
+                    startDate,
+                    preferences: preferences.join(', '),
+                    groupType,
+                    groupSize,
+                    constraints
+                })
+            });
+            if (!response.ok) throw new Error('Failed to fetch itinerary');
+            const data = await response.json();
+            setResult(data);
+        } catch (err) {
+            setError('Could not generate itinerary. Please check your backend and try again.');
+        }
+        setLoading(false);
     };
 
     return (
@@ -54,14 +69,41 @@ export default function App() {
                 <h2 style={{ textAlign: 'center', marginBottom: 24, color: '#2d3e50' }}>AI Trip Planner</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <input placeholder="Budget" value={budget} onChange={e => setBudget(e.target.value)} type="number" style={inputStyle} />
-                    <input placeholder="Currency (e.g. USD)" value={currency} onChange={e => setCurrency(e.target.value)} style={inputStyle} />
+                    <select value={currency} onChange={e => setCurrency(e.target.value)} style={inputStyle}>
+                        {currencyOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
                     <input placeholder="Trip Duration (days)" value={duration} onChange={e => setDuration(e.target.value)} type="number" style={inputStyle} />
-                    <input placeholder="Start Date (YYYY-MM-DD)" value={startDate} onChange={e => setStartDate(e.target.value)} style={inputStyle} />
-                    <input placeholder="Preferences (e.g. food, adventure)" value={preferences} onChange={e => setPreferences(e.target.value)} style={inputStyle} />
-                    <input placeholder="Group Type (solo, couple, family, friends)" value={groupType} onChange={e => setGroupType(e.target.value)} style={inputStyle} />
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
+                        style={inputStyle}
+                    />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {preferenceOptions.map(opt => (
+                            <label key={opt} style={{ fontSize: 14 }}>
+                                <input
+                                    type="checkbox"
+                                    checked={preferences.includes(opt)}
+                                    onChange={e => {
+                                        if (e.target.checked) setPreferences([...preferences, opt]);
+                                        else setPreferences(preferences.filter(p => p !== opt));
+                                    }}
+                                    style={{ marginRight: 4 }}
+                                />
+                                {opt}
+                            </label>
+                        ))}
+                    </div>
+                    <select value={groupType} onChange={e => setGroupType(e.target.value)} style={inputStyle}>
+                        {groupTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
                     <input placeholder="Group Size" value={groupSize} onChange={e => setGroupSize(e.target.value)} type="number" style={inputStyle} />
                     <input placeholder="Constraints (diet, accessibility)" value={constraints} onChange={e => setConstraints(e.target.value)} style={inputStyle} />
-                    <button onClick={handleSubmit} style={buttonStyle}>Generate Itinerary</button>
+                    <button onClick={handleSubmit} style={buttonStyle} disabled={loading}>
+                        {loading ? 'Generating...' : 'Generate Itinerary'}
+                    </button>
+                    {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
                 </div>
                 {result && (
                     <div style={{ background: '#f0f6fa', padding: 16, borderRadius: 10, marginTop: 24 }}>
